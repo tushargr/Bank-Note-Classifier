@@ -25,10 +25,10 @@ classifier.fit(svmhogfeatures,train_labels)
 
 
 def grad(image):
-    gradient=np.ndarray((128,256),dtype=np.float32)
-    gmagnitude=np.ndarray((128,256),dtype=np.float32)
-    for i in range(1,129):
-        for j in range(1,257):
+    gradient=np.ndarray((400,800),dtype=np.float32)
+    gmagnitude=np.ndarray((400,800),dtype=np.float32)
+    for i in range(1,401):
+        for j in range(1,801):
             gx=image[i-1,j]-image[i+1,j]
             gy=image[i,j-1]-image[i,j+1]
             if(gx==0 and gy==0):
@@ -48,6 +48,7 @@ def grad(image):
                     gradient[i-1,j-1]=a
                 else:
                     gradient[i-1,j-1]=a+180
+
     return gradient,gmagnitude
 
 def histogram(gradient,gmagnitude,j1,j2,k1,k2):
@@ -123,16 +124,16 @@ for folder in folders:
     images.sort()
     for image in images:
         imagepath=os.path.join(folder,image)
-        test_dataset=np.ndarray((1,130,258),dtype=np.float32)
-        resizedimage=np.zeros((130,258),dtype=np.float32)
+        test_dataset=np.ndarray((1,402,802),dtype=np.float32)
+        resizedimage=np.zeros((402,802),dtype=np.float32)
         imag=ndimage.imread(imagepath,flatten=1).astype(float)
-        resizedimage=scipy.misc.imresize(imag,(130,258))
+        resizedimage=scipy.misc.imresize(imag,(402,802))
 
         test_dataset[0,:,:]=resizedimage
 
-        gradient=np.ndarray((128,256),dtype=np.float32)
-        gmagnitude=np.ndarray((128,256),dtype=np.float32)
-        imge=np.ndarray((130,258),dtype=np.float32)
+        gradient=np.ndarray((400,800),dtype=np.float32)
+        gmagnitude=np.ndarray((400,800),dtype=np.float32)
+        imge=np.ndarray((402,802),dtype=np.float32)
         imge=test_dataset[0,:,:]
 
         gradient,gmagnitude=grad(imge)
@@ -141,18 +142,18 @@ for folder in folders:
         j=0
         k=0
         count=0
-        while(j<=96):
+        while(j<=300):
             k=0
-            while(k<=224):
+            while(k<=700):
                 histcell1=np.ndarray((1,9),dtype=np.float32)
                 histcell2=np.ndarray((1,9),dtype=np.float32)
                 histcell3=np.ndarray((1,9),dtype=np.float32)
                 histcell4=np.ndarray((1,9),dtype=np.float32)
                 blockhist=np.ndarray((1,36),dtype=np.float32)
-                histcell1=histogram(gradient,gmagnitude,j,j+15,k,k+15)
-                histcell2=histogram(gradient,gmagnitude,j,j+15,k+16,k+31)
-                histcell3=histogram(gradient,gmagnitude,j+16,j+31,k,k+15)
-                histcell4=histogram(gradient,gmagnitude,j+16,j+31,k+16,k+31)
+                histcell1=histogram(gradient,gmagnitude,j,j+49,k,k+49)
+                histcell2=histogram(gradient,gmagnitude,j,j+49,k+50,k+99)
+                histcell3=histogram(gradient,gmagnitude,j+50,j+99,k,k+49)
+                histcell4=histogram(gradient,gmagnitude,j+50,j+99,k+50,k+99)
                 blockhist[0,:9]=histcell1
                 blockhist[0,9:18]=histcell2
                 blockhist[0,18:27]=histcell3
@@ -160,8 +161,8 @@ for folder in folders:
                 blockhist=normalise(blockhist)
                 hogfeatures[0,count:count+36]=blockhist
                 count+=36
-                k+=16
-            j+=16
+                k+=50
+            j+=50
 
 
         print 'Actual-',note,' prediction-',classifier.predict(hogfeatures)[0]
